@@ -8,6 +8,7 @@ import model.user.User;
 
 import java.io.*;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.List;
 
 public class ClientHandler implements Runnable {
@@ -16,6 +17,7 @@ public class ClientHandler implements Runnable {
     private BufferedReader reader;
     private BufferedWriter writer;
     private String email;
+    private  int id;
     List<User> onlineUsers;
 
     public ClientHandler(Socket socket) {
@@ -43,19 +45,19 @@ public class ClientHandler implements Runnable {
 
                     if (success) {
                         this.email = email;
-
+                      this.id = User.getUserByEmail(email).getUser_id();
                         // تحديث الحالة إلى Online
                         User.updateStatusUser(email, Status.ONLINE);
 
                         // إرسال SUCCESS
-                        writer.write("SUCCESS");
+                        writer.write("SUCCESS:"+this.id);
                         writer.newLine();
                          writer.flush();
                         // إرسال قائمة الأعضاء المتصلين
                         onlineUsers = User.getUserOnline();
 
                         for (User u : onlineUsers) {
-                            writer.write("USER:" + u.getFull_name() + ":" + u.getEmail());
+                            writer.write("USER:" + u.getFull_name() + ":" + u.getEmail() +":"+u.getUser_id());
                             writer.newLine();
                         }
 
@@ -131,6 +133,30 @@ public class ClientHandler implements Runnable {
 
                     }
                     closeEverything();
+
+                }
+                else if(message!=null && message.startsWith("GET_MESSAGE:"))
+                {
+                    List<Message> messages;
+                    String [] param = message.split(":");
+                    String senderId = param[1];
+                    String reciver_id = param[2];
+                    try {
+                        messages = Message.getMessage(Integer.parseInt(senderId), Integer.parseInt(reciver_id));
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e.getMessage());
+                    }
+                    if(messages!=null)
+                    {
+                        for(Message m : messages) {
+                            writer.write("SUCCESSFUL_SEND_MESSAGE:" + m.getMessage_text());
+                            writer.newLine();
+                            writer.flush();
+                        }
+                        writer.write("END_MESSAGES");
+                        writer.newLine();
+                        writer.flush();
+                    }
 
                 }
             }

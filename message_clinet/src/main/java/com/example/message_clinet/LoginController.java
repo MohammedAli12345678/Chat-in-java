@@ -42,7 +42,10 @@ public class LoginController {
             // استقبال الرد من السيرفر
             String response = reader.readLine();
 
-            if ("SUCCESS".equals(response)) {
+            if (response.startsWith("SUCCESS:")) {
+                String [] param = response.split(":");
+                int id = Integer.parseInt( param[1]);
+                AppState.id = id;
                 AppState.currentEmail = email;
                 AppState.socket = socket;
                 AppState.bufferedWriter = writer;

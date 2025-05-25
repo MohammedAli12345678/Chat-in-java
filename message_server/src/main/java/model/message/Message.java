@@ -4,6 +4,7 @@ import model.connectionDataBase;
 import model.user.User;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -110,23 +111,30 @@ public class Message {
     }
 
     public static List<Message> getMessage(int sender_id, int resever_id) throws SQLException {
-        sql = "select * from users where sender_id=? and resever_id=?";
-
+        sql = "select * from messages where (sender_id=? and resever_id=?) or (sender_id=? and resever_id=?) order by send_at";
         conn = connectionDataBase.getInstance().getConntion();
+        List<Message> messages = new ArrayList<>();
 
-        try (PreparedStatement pre = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);) {
+        try (PreparedStatement pre = conn.prepareStatement(sql)) {
             pre.setInt(1, sender_id);
             pre.setInt(2, resever_id);
-            List<Message> massages;
-            int a = pre.executeUpdate();
-            if (re.next()) {
-                return (List<Message>) re;
+            pre.setInt(3, resever_id); // لعكس الترتيب
+            pre.setInt(4, sender_id);
+
+            ResultSet re = pre.executeQuery();
+            while (re.next()) {
+                Message m = new Message(
+                        re.getInt("sender_id"),
+                        re.getInt("resever_id"),
+                        re.getString("message_text"),
+                        re.getString("send_at"),
+                        re.getString("is_read")
+                );
+                m.setId(re.getInt("id"));
+                messages.add(m);
             }
-
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
         }
-
-return null;
+        return messages;
     }
+
 }

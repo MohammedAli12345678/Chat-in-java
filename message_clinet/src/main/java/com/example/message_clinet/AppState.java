@@ -10,4 +10,5 @@ public class AppState {
     public static Socket socket;
     public  static BufferedWriter bufferedWriter;
     public static BufferedReader reader;
+    public  static int id;
 }

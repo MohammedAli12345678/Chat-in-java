@@ -32,7 +32,9 @@ import java.util.ResourceBundle;
 public class HelloController implements Initializable {
 
     String [] selectedUser = {null};
+    private  int selectedIdUser;
     Map<String,String> nameToEmail = new HashMap<>();
+    Map<String,Integer>IdToEmail = new HashMap<>();
     @FXML
     private Button Button_send;
     @FXML
@@ -54,11 +56,40 @@ public class HelloController implements Initializable {
 
         Button_send.setVisible(false);
         tf_main.setVisible(false);
+        vBox_main.setVisible(false);
         onlineUserList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 selectedUser[0] = nameToEmail.get(newValue);
-                Button_send.setVisible(true);
-                tf_main.setVisible(true);
+                 selectedIdUser = IdToEmail.get(nameToEmail.get(newValue));
+                new Thread(() -> {
+                    try {
+                        AppState.bufferedWriter.write("GET_MESSAGE:" + AppState.id + ":" + selectedIdUser);
+                        AppState.bufferedWriter.newLine();
+                        AppState.bufferedWriter.flush();
+
+                        Platform.runLater(() -> {
+                            vBox_main.getChildren().clear(); // تنظيف الشات القديم
+                            sp_main.setVisible(true);
+                            Button_send.setVisible(true);
+                            tf_main.setVisible(true);
+                            vBox_main.setVisible(true);
+                        });
+
+                        String rep;
+                        while (!(rep = AppState.reader.readLine()).equals("END_MESSAGES")) {
+                            if (rep.startsWith("SUCCESSFUL_SEND_MESSAGE:")) {
+                                String[] pram = rep.split(":", 2);
+                                String message = pram[1];
+                                Platform.runLater(() -> {
+                                    HelloController.addLebal("Old: " + message, vBox_main);
+                                });
+                            }
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }).start();
+
             }
         });
 
@@ -134,7 +165,7 @@ public class HelloController implements Initializable {
             try {
                 String line;
                 while ((line = AppState.reader.readLine()) != null) {
-                    if (line.equals("SUCCESS")) {
+                    if (line.startsWith("SUCCESS:")) {
                         System.out.println("Sussccful Loing");
                         continue; // تجاوز رسالة الدخول الناجح
                     } else if (line.startsWith("USER:")) {
@@ -145,7 +176,11 @@ public class HelloController implements Initializable {
                          String [] parts = line.split(":");
                          String fullName = parts[1];
                          String email = parts[2];
+                         int id = Integer.parseInt(parts[3]);
+
+
                          nameToEmail.put(fullName,email);
+                         IdToEmail.put(email,id);
                          Platform.runLater(()-> {
                              if (!AppState.currentEmail.equals(email) && !onlineUserList.getItems().contains(fullName)) {
                                  onlineUserList.getItems().add(fullName);
