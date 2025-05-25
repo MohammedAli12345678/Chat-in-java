@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="ap_main" maxHeight="-Infinity" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="509.0" prefWidth="747.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.message_clinet.HelloController">
+    <children>
+        <Button fx:id="Button_send" layoutX="668.0" layoutY="468.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="50.0" text="Send" />
+        <TextField fx:id="tf_main" layoutX="251.0" layoutY="467.0" prefHeight="26.0" prefWidth="407.0" />
+        <ScrollPane fx:id="sp_main" fitToWidth="true" layoutX="245.0" layoutY="36.0" prefHeight="422.0" prefWidth="481.0">
+            <content>
+                <VBox fx:id="vBox_main" />
+            </content>
+        </ScrollPane>
+        <Label accessibleRole="IMAGE_VIEW" alignment="CENTER" layoutX="371.0" prefHeight="18.0" prefWidth="214.0" text="Wittcode Messenger">
+            <font>
+                <Font size="18.0" />
+            </font>
+        </Label>
+      <ListView fx:id="onlineUserList" layoutX="14.0" layoutY="14.0" prefHeight="490.0" prefWidth="206.0" />
+      <Button fx:id="Button_logout" layoutX="37.0" layoutY="468.0" mnemonicParsing="false" onAction="#logoutuser" prefHeight="26.0" prefWidth="97.0" text="Logout " textFill="#ef0707" />
+    </children>
+</AnchorPane>
