@@ -43,6 +43,7 @@ public class User {
         this.photo = photo;
     }
 
+
     public int getUser_id() {
         return user_id;
     }
@@ -229,6 +230,35 @@ public  static  User getUserByEmail(String email)
     }
     return  null;
 }
+
+
+    public static User getUserById(int senderId) {
+        Connection conn = connectionDataBase.getInstance().getConntion();
+        User user = null;
+        String sql = "select * from users where user_id= ?";
+        List<User> onlineUsers = new ArrayList<>();
+        try (PreparedStatement pre = conn.prepareStatement(sql);) {
+            pre.setInt(1, senderId);
+            ResultSet re = pre.executeQuery();
+            while (re.next()) {
+                user= new User(
+                        re.getString("full_name"),
+                        re.getString("email"),
+                        re.getString("password"),
+                        re.getString("status"),
+                        re.getString("phone_number"),
+                        re.getString("profile_picture")
+                );
+                user.setUser_id(re.getInt("user_id"));
+
+            }
+            return  user;
+
+        } catch (SQLException e) {
+            System.out.println("can Not User By Email " + e.getMessage());
+        }
+        return  null;
+    }
 
 
 }

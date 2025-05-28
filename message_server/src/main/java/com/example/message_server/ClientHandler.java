@@ -59,6 +59,7 @@ public class ClientHandler implements Runnable {
                         for (User u : onlineUsers) {
                             writer.write("USER:" + u.getFull_name() + ":" + u.getEmail() +":"+u.getUser_id());
                             writer.newLine();
+                            writer.flush();
                         }
 
                         writer.write("END");
@@ -68,7 +69,7 @@ public class ClientHandler implements Runnable {
                         {
                             if(client !=this && client.email !=null)
                             {
-                                client.writer.write("USER:"+User.getUserByEmail(email).getFull_name()+":" + email);
+                                client.writer.write("USER:"+User.getUserByEmail(email).getFull_name()+":" + email + ":"  +User.getUserByEmail(email).getUser_id());
                                 client.writer.newLine();
                                 client.writer.flush();
                             }
@@ -102,7 +103,7 @@ public class ClientHandler implements Runnable {
 
                     for(ClientHandler client : Server.clientHandlers)
                     {
-                        if(client.email != null && client.email.equals(recevierEmail))
+                        if(client.email != null && (client.email.equals(recevierEmail) || client.email.equals(senderEmail)))
                         {
                             client.writer.write("MSG_FROM:" + senderEmail + ":" + messageText);
                             client.writer.newLine();
@@ -149,7 +150,8 @@ public class ClientHandler implements Runnable {
                     if(messages!=null)
                     {
                         for(Message m : messages) {
-                            writer.write("SUCCESSFUL_SEND_MESSAGE:" + m.getMessage_text());
+                            String senderEmail = User.getUserById(m.getSender_id()).getEmail();
+                            writer.write("SUCCESSFUL_SEND_MESSAGE:"+senderEmail+":" + m.getMessage_text());
                             writer.newLine();
                             writer.flush();
                         }

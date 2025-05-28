@@ -33,8 +33,8 @@ public class HelloController implements Initializable {
 
     String [] selectedUser = {null};
     private  int selectedIdUser;
-    Map<String,String> nameToEmail = new HashMap<>();
-    Map<String,Integer>IdToEmail = new HashMap<>();
+     public  static  Map<String,String> nameToEmail = new HashMap<>();
+    public  static   Map<String,Integer>IdToEmail = new HashMap<>();
     @FXML
     private Button Button_send;
     @FXML
@@ -47,12 +47,16 @@ public class HelloController implements Initializable {
     private   Client client;
     @FXML
     private ListView<String>onlineUserList;
+    public static ListView<String> onlineUserListStatic;
+     public  static HelloController instance;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        instance = this;
         client = new Client(AppState.socket);
         System.out.println("Connected to Server");
-        receiveOnlineUsers();
+        //receiveOnlineUsers();
+        HelloController.onlineUserListStatic = onlineUserList;
 
         Button_send.setVisible(false);
         tf_main.setVisible(false);
@@ -61,34 +65,21 @@ public class HelloController implements Initializable {
             if (newValue != null) {
                 selectedUser[0] = nameToEmail.get(newValue);
                  selectedIdUser = IdToEmail.get(nameToEmail.get(newValue));
-                new Thread(() -> {
-                    try {
-                        AppState.bufferedWriter.write("GET_MESSAGE:" + AppState.id + ":" + selectedIdUser);
-                        AppState.bufferedWriter.newLine();
-                        AppState.bufferedWriter.flush();
+                try {
+                    AppState.bufferedWriter.write("GET_MESSAGE:" + AppState.id + ":" + selectedIdUser);
+                    AppState.bufferedWriter.newLine();
+                    AppState.bufferedWriter.flush();
 
-                        Platform.runLater(() -> {
-                            vBox_main.getChildren().clear(); // تنظيف الشات القديم
-                            sp_main.setVisible(true);
-                            Button_send.setVisible(true);
-                            tf_main.setVisible(true);
-                            vBox_main.setVisible(true);
-                        });
-
-                        String rep;
-                        while (!(rep = AppState.reader.readLine()).equals("END_MESSAGES")) {
-                            if (rep.startsWith("SUCCESSFUL_SEND_MESSAGE:")) {
-                                String[] pram = rep.split(":", 2);
-                                String message = pram[1];
-                                Platform.runLater(() -> {
-                                    HelloController.addLebal("Old: " + message, vBox_main);
-                                });
-                            }
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }).start();
+                    Platform.runLater(() -> {
+                        vBox_main.getChildren().clear();
+                        sp_main.setVisible(true);
+                        Button_send.setVisible(true);
+                        tf_main.setVisible(true);
+                        vBox_main.setVisible(true);
+                    });
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
             }
         });
@@ -132,6 +123,11 @@ public class HelloController implements Initializable {
         });
     }
 
+    public  VBox getvBox_main()
+    {
+        return vBox_main;
+    }
+
 
     public  static void addLebal(String messageFromServer,VBox vBox)
     {
@@ -159,7 +155,7 @@ public class HelloController implements Initializable {
         });
 
     }
-
+/*
     private void receiveOnlineUsers() {
         new Thread(() -> {
             try {
@@ -173,6 +169,7 @@ public class HelloController implements Initializable {
                         String userFullName = line.substring(5);
                         Platform.runLater(() -> onlineUserList.getItems().add(userFullName));
                         */
+    /*
                          String [] parts = line.split(":");
                          String fullName = parts[1];
                          String email = parts[2];
@@ -223,7 +220,11 @@ public class HelloController implements Initializable {
                 e.printStackTrace();
             }
         }).start();
+
+
     }
+
+     */
 
     @FXML
     private  void logoutuser(ActionEvent event) throws IOException {
